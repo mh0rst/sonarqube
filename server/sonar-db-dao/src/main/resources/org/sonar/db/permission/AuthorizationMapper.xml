@@ -408,7 +408,7 @@
         ur.organization_uuid = p.organization_uuid
         AND ur.resource_id = p.id
         AND ur.role = #{permission,jdbcType=VARCHAR}
-        AND u.login IN <foreach collection="logins" open="(" close=")" item="login" separator=",">#{login}</foreach>
+        AND u.login IN <foreach collection="logins" open="(" close=")" item="login" separator=",">#{login,jdbcType=VARCHAR}</foreach>
 
       UNION
 
@@ -419,18 +419,20 @@
       INNER JOIN groups_users gu ON gr.group_id = gu.group_id
       WHERE
         gu.user_id = u.id
+        AND gr.resource_id = p.id
         AND gr.role = #{permission,jdbcType=VARCHAR}
-        AND u.login IN <foreach collection="logins" open="(" close=")" item="login" separator=",">#{login}</foreach>
+        AND u.login IN <foreach collection="logins" open="(" close=")" item="login" separator=",">#{login,jdbcType=VARCHAR}</foreach>
 
     <if test="permission == 'user' or permission == 'codeviewer'">
       UNION
 
       SELECT u.login
       FROM users u
-      INNER JOIN projects p ON p.kee = #{projectKey,jdbcType=VARCHAR}
       WHERE
-        p.private = ${_false}
-        AND u.login IN <foreach collection="logins" open="(" close=")" item="login" separator=",">#{login}</foreach>
+      u.login in <foreach collection="logins" open="(" close=")" item="login" separator=",">#{login,jdbcType=VARCHAR}</foreach>
+      and exists (
+        select 1 from projects p where p.kee = #{projectKey,jdbcType=VARCHAR} and p.private = ${_false}
+      )
     </if>
   </select>
 </mapper>
