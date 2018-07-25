@@ -90,7 +90,8 @@ public class AbstractTracker<RAW extends Trackable, BASE extends Trackable> {
       }
       LineAndLineHashKey that = (LineAndLineHashKey) o;
       // start with most discriminant field
-      return Objects.equals(line, that.line)
+      return (line != null || StringUtils.isNotEmpty(lineHash))
+        && Objects.equals(line, that.line)
         && lineHash.equals(that.lineHash)
         && ruleKey.equals(that.ruleKey);
     }
